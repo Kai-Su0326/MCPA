@@ -1,0 +1,53 @@
+/* problem1.c - implementation of Linux `tree` */
+#include<stdio.h>
+#include<dirent.h>
+#include<stdlib.h>
+#include<string.h>
+void print_dir(char* d,int p)
+{
+    struct dirent* dent;     //declare a dirent pointer to store the return value of readdir(), which can access the file name.
+    DIR* dir = opendir(d);    //declare a DIR pointer to store the opendir() return value, if the path is a file, NULL will be returned
+    char space[50000] = "";     //declare a char pointer pointing a char storing spaces
+    for(int x=0;x<p;x++)    //to increment the number of four-spaces
+	{
+	    strcat(space,"    ");    //append the new spaces to old spaces
+	};	
+    if(dir!=NULL)    //check if the directory is opennable
+    {
+        while((dent = readdir(dir))!=NULL)    //check if the directory reaches the end
+      	{
+	    if(dent->d_name[0]!='.')     //check if d_name is a hidden file or parent directory or current directory
+		{
+		    printf("%s",space);     //print the spaces first
+		    printf("%s\n",dent->d_name);     //print the path end name
+		    char str[30000];    // declare a char to store the new path
+		    strcpy(str,d);    //creat the new path
+		    strcat(str,"/");
+                    strcat(str,dent->d_name);
+		    print_dir(str,p+1);    //recursively call the function with new path and new number of spaces
+		};	    
+	};
+
+    }
+    else
+    {
+	return;    //end the recurssion
+	closedir(dir);    //close the directory
+    };
+}
+int main(int argc, char* argv[])
+{
+    char d[30000];    //declare a char to store the path
+    if(argc == 1)   //check is there any input as a path
+	{
+	    strcpy(d,".");    //"." serves as current path and store it in d
+	}
+    else
+	{ 
+            strcpy(d,argv[1]);    //store the path in d
+	};
+    printf("%s\n",d);    //print out the input path as the first line of the tree
+    int i = 1;   //declare a number to record how many four-spaces I should add in front of each line
+    print_dir(d,i);    //call the function and send the path and i as the arguements
+    return(0);
+}
